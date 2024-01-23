@@ -3,8 +3,8 @@ import pygame, sys, random, math
 
 pygame.init()
 
-screen_width = 800
-screen_height = 600
+screen_width = 1400
+screen_height = 800
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("agar.io")
 
@@ -15,19 +15,19 @@ clock = pygame.time.Clock()
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super(Enemy, self).__init__()
-        self.radius = random.randint(35,85)
+        self.radius = random.randint(35,65)
         self.color = (random.randint(0,240), random.randint(0,240), random.randint(0,240), 180)
         self.image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA, 32)
         self.image = self.image.convert_alpha()
         pygame.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius)
-        self.deltax = random.choice([-3,-2,-1,1,2,3])
-        self.deltay = random.choice([-3,-2,-1,1,2,3])
+        self.deltax = random.choice([-2,-1,1,2])
+        self.deltay = random.choice([-2,-1,1,2])
         self.rect = self.image.get_rect(center = (x,y))
 
     def move(self):
-        if self.rect.left <= -0 or self.rect.right >= 800:
+        if self.rect.left <= -0 or self.rect.right >= 1400:
             self.deltax *= -1
-        if self.rect.top <= -100 or self.rect.bottom >= 600:
+        if self.rect.top <= -0 or self.rect.bottom >= 800:
             self.deltay *= -1
         self.rect.centerx += self.deltax
         self.rect.centery += self.deltay
@@ -41,33 +41,36 @@ class Enemy(pygame.sprite.Sprite):
 
 class Player(Enemy):
     def __init__(self, x, y):
-        super().__init__()
+        super(Enemy, self).__init__()
         self.color = (255, 255, 255)
-        self.radius = 45
+        self.radius = 55
         self.image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA, 32)
         self.image = self.image.convert_alpha()
         pygame.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius)
-        self.rect = self.image.get_rect(center = (100,100))
+        self.rect = self.image.get_rect(center = (x,y))
     def move(self):
         mx, my = pygame.mouse.get_pos()
         distx = mx - self.rect.centerx
         disty = my - self.rect.centery
-        hyp = math.sqrt(distx**2 - disty**2)
+        hyp = math.sqrt(abs(distx**2 - disty**2))
         if hyp == 0:
-            hyp = 0.000001
-        deltax = distx/hyp
-        deltay = disty/hyp
-        if self.rect.left <= -0 or self.rect.right >= 800:
+            hyp = 0.01
+        self.deltax = distx/hyp
+        self.deltay = disty/hyp
+        if self.rect.left <= -0 or self.rect.right >= 1400:
             self.deltax *= -1
-        if self.rect.top <= -100 or self.rect.bottom >= 600:
+        if self.rect.top <= -0 or self.rect.bottom >= 800:
             self.deltay *= -1
         self.rect.centerx += self.deltax
         self.rect.centery += self.deltay
+players = pygame.sprite.Group()
+chris = Player(random.randint(600,800),random.randint(450,550))
+players.add(chris)
 
 
 tangoes = pygame.sprite.Group()
 for num in range(4):
-    tangoes.add(Enemy(random.randint(100,700),random.randint(100,500)))
+    tangoes.add(Enemy(random.randint(100,1300),random.randint(100,700)))
 
     
 
@@ -78,7 +81,7 @@ class Food(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA, 32)
         self.image = self.image.convert_alpha()
         pygame.draw.circle(self.image, color, (self.radius, self.radius), self.radius)
-        self.rect = self.image.get_rect(center = (random.randint(15,785),random.randint(15, 585)))
+        self.rect = self.image.get_rect(center = (random.randint(50,1350),random.randint(30, 770)))
 
 
 meals = pygame.sprite.Group()
@@ -87,8 +90,7 @@ for num in range(20):
 objects = pygame.sprite.Group()
 objects.add(meals)
 objects.add(tangoes)
-
-
+objects.add(players)
 running = True
 while running:
 
@@ -98,7 +100,9 @@ while running:
 
     screen.fill("black")
 
-   
+    if chris in objects:
+        chris.move()
+    players.draw(screen)
 
     meals.draw(screen)
    
@@ -111,6 +115,9 @@ while running:
                 if other != obj and type(obj) != Food:
                     if math.dist(obj.rect.center, other.rect.center) < (obj.radius + other.radius)*.7 and obj.radius > other.radius:
                         obj.radius += other.radius
+                        obj.image = pygame.Surface((obj.radius * 2, obj.radius * 2), pygame.SRCALPHA, 32)
+                        obj.image = obj.image.convert_alpha()
+                        pygame.draw.circle(obj.image, obj.color, (obj.radius, obj.radius), obj.radius)
                         objects.remove(other)
                         other.kill()
 
