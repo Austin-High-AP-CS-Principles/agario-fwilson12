@@ -50,6 +50,19 @@ class Player(Enemy):
         self.rect = self.image.get_rect(center = (100,100))
     def move(self):
         mx, my = pygame.mouse.get_pos()
+        distx = mx - self.rect.centerx
+        disty = my - self.rect.centery
+        hyp = math.sqrt(distx**2 - disty**2)
+        if hyp == 0:
+            hyp = 0.000001
+        deltax = distx/hyp
+        deltay = disty/hyp
+        if self.rect.left <= -0 or self.rect.right >= 800:
+            self.deltax *= -1
+        if self.rect.top <= -100 or self.rect.bottom >= 600:
+            self.deltay *= -1
+        self.rect.centerx += self.deltax
+        self.rect.centery += self.deltay
 
 
 tangoes = pygame.sprite.Group()
@@ -99,6 +112,7 @@ while running:
                     if math.dist(obj.rect.center, other.rect.center) < (obj.radius + other.radius)*.7 and obj.radius > other.radius:
                         obj.radius += other.radius
                         objects.remove(other)
+                        other.kill()
 
 
     pygame.display.flip()
