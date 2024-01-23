@@ -15,13 +15,13 @@ clock = pygame.time.Clock()
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super(Enemy, self).__init__()
-        self.radius = random.randint(35,65)
+        self.radius = random.randint(25,65)
         self.color = (random.randint(0,240), random.randint(0,240), random.randint(0,240), 180)
         self.image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA, 32)
         self.image = self.image.convert_alpha()
         pygame.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius)
-        self.deltax = random.choice([-2,-1,1,2])
-        self.deltay = random.choice([-2,-1,1,2])
+        self.deltax = random.choice([-2,2])
+        self.deltay = random.choice([-2,2])
         self.rect = self.image.get_rect(center = (x,y))
 
     def move(self):
@@ -29,8 +29,20 @@ class Enemy(pygame.sprite.Sprite):
             self.deltax *= -1
         if self.rect.top <= -0 or self.rect.bottom >= 800:
             self.deltay *= -1
-        self.rect.centerx += self.deltax
-        self.rect.centery += self.deltay
+        multi = 1
+        if 0 <= self.radius <= 40:
+            multi = 1.5
+        elif 40 < self.radius <= 60:
+            multi = .75
+        elif 60 < self.radius <= 80:
+            multi = .667
+        elif 80 < self.radius <= 100:
+            multi = .5
+        elif 100 < self.radius:
+            multi = .3
+
+        self.rect.centerx += self.deltax *multi
+        self.rect.centery += self.deltay *multi
     def collision_check(self, other):
         if math.dist(self.rect.center, other.rect.center) < (self.radius + other.radius)*.6:
             return True
@@ -63,9 +75,9 @@ class Player(Enemy):
             self.deltay *= -1
         self.rect.centerx += self.deltax
         self.rect.centery += self.deltay
-players = pygame.sprite.Group()
-chris = Player(random.randint(600,800),random.randint(450,550))
-players.add(chris)
+# players = pygame.sprite.Group()
+# chris = Player(random.randint(600,800),random.randint(450,550))
+# players.add(chris)
 
 
 tangoes = pygame.sprite.Group()
@@ -90,7 +102,7 @@ for num in range(20):
 objects = pygame.sprite.Group()
 objects.add(meals)
 objects.add(tangoes)
-objects.add(players)
+# objects.add(players)
 running = True
 while running:
 
@@ -100,9 +112,9 @@ while running:
 
     screen.fill("black")
 
-    if chris in objects:
-        chris.move()
-    players.draw(screen)
+    # if chris in objects:
+    #     chris.move()
+    # players.draw(screen)
 
     meals.draw(screen)
    
