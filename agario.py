@@ -35,9 +35,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center = (x,y))
 
     def move(self):
-        if self.rect.left <= -0 or self.rect.right >= 1400:
+        if self.rect.left <= 2 or self.rect.right >= 1398:
             self.deltax *= -1
-        if self.rect.top <= -0 or self.rect.bottom >= 800:
+        if self.rect.top <= 2 or self.rect.bottom >= 798:
             self.deltay *= -1
         multi = 1
         if 0 <= self.radius <= 40:
