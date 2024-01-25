@@ -54,12 +54,16 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.centerx += self.deltax *multi
         self.rect.centery += self.deltay *multi
     def collision_check(self, other):
-        if math.dist(self.rect.center, other.rect.center) < (self.radius + other.radius)*.6:
+        if math.dist(self.rect.center, other.rect.center) < (self.radius + other.radius)*.65 and self.radius > 1.1 * other.radius:
             return True
         else: 
             return False
     def grow(self, other):
         self.radius += other.radius
+        self.image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA, 32)
+        self.image = self.image.convert_alpha()
+        pygame.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius)
+        self.rect = self.image.get_rect(center=self.rect.center)
 
 class Player(Enemy):
     def __init__(self, x, y):
@@ -80,6 +84,12 @@ class Player(Enemy):
             self.deltay = disty/hyp 
         self.rect.centerx += self.deltax
         self.rect.centery += self.deltay
+    def loser(self):
+        font = pygame.font.SysFont(None, 55)
+        text = font.render("You died...", True, 'blue')
+        screen.blit(text, (screen_width//2 - text.get_width() // 2, screen_height // 2 - text.get_height() // 2))
+        pygame.display.flip()
+        pygame.time.delay(2000)
     
         
 players = pygame.sprite.Group()
@@ -105,7 +115,7 @@ class Food(pygame.sprite.Sprite):
 
 meals = pygame.sprite.Group()
 for num in range(10):
-    meals.add(Food(random.choice(['red','yellow','green','blue','purple'])))
+    meals.add(Food(random.choice(['red','yellow','green','blue'])))
 objects = pygame.sprite.Group()
 objects.add(meals)
 objects.add(tangoes)
@@ -139,18 +149,15 @@ while running:
     for obj in objects:
             for other in objects:
                 if other != obj and type(obj) != Food:
-                    if math.dist(obj.rect.center, other.rect.center) < (obj.radius + other.radius)*.65 and obj.radius > 1.1 * other.radius:
-                        obj.radius += other.radius
-                        obj.image = pygame.Surface((obj.radius * 2, obj.radius * 2), pygame.SRCALPHA, 32)
-                        obj.image = obj.image.convert_alpha()
-                        pygame.draw.circle(obj.image, obj.color, (obj.radius, obj.radius), obj.radius)
-                        obj.rect = obj.image.get_rect(center=obj.rect.center)
+                    if obj.collision_check(other):
+                        obj.grow(other)
                         if type(other) != Food:
                             objects.remove(other)
                             other.kill()
                         elif type(other) == Food:
                             other.rect.x, other.rect.y = (random.randint(50,1350),random.randint(30, 770))
-
+    if chris not in objects:
+        chris.loser()
     
     pygame.display.flip()
     clock.tick(60)
