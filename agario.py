@@ -98,7 +98,7 @@ players.add(chris)
 
 
 tangoes = pygame.sprite.Group()
-for num in range(4):
+for num in range(5):
     tangoes.add(Enemy(random.randint(100,1300),random.randint(100,700)))
 
     
